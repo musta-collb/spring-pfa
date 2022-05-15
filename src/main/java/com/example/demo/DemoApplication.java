@@ -1,11 +1,11 @@
 package com.example.demo;
 
-import com.example.demo.security.PasswordEncoder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@SpringBootApplication(scanBasePackages = {"com.example.demo.entities","com.example.demo.repositories", "com.example.demo.api","com.example.demo.security"})
+@SpringBootApplication(scanBasePackages = {"com.example.demo.entities","com.example.demo.repositories", "com.example.demo.api","com.example.demo.security","com.example.demo.services"})
 public class DemoApplication {
 
 	public static void main(String[] args) {
@@ -13,7 +13,7 @@ public class DemoApplication {
 
 	}
 	@Bean
-	public PasswordEncoder bCryptPasswordEncoder(){
-		return new PasswordEncoder();
+	public BCryptPasswordEncoder passwordEncoder(){
+		return new BCryptPasswordEncoder();
 	}
 }

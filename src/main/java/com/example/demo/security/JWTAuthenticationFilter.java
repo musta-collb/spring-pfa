@@ -27,7 +27,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		super();
 		this.authenticationManager = authenticationManager;
 		// to change the url of our preference for the authentication end point.
-		setFilterProcessesUrl("/authenticate");
+		setFilterProcessesUrl("/login/**");
 	}	
 
 	@Override
@@ -42,7 +42,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println("......ACCESS 1 " + user.getPassword());
+		System.out.println("......attemps auth" + user.getPassword()+" "+user.getEmail());
 		return authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
 	}
@@ -54,7 +54,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 											FilterChain chain,
 											Authentication authResult) throws IOException, ServletException 
 	{
-		System.out.println("......ACCESS 2");
+		System.out.println("......secces auth");
 		User springUser = (User) authResult.getPrincipal();
 		String jwtToken = Jwts.builder().setSubject(springUser.getUsername())
 				.setExpiration(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))

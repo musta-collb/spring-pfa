@@ -7,4 +7,6 @@ import org.springframework.lang.NonNull;
 public interface PersonnelRepository extends JpaRepository<Personnel, Long> {
     Personnel findByEmailEquals(@NonNull String email);
 
+    Personnel findByEmailEqualsAndPasswordEquals(String email, String password);
+
 }
