@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,11 +13,14 @@ import java.util.List;
 @Table(name = "appel_offre")
 @Data
 @NoArgsConstructor
+
+@JsonIgnoreProperties( {"offres","hibernateLazyInitializer", "handler"})
 public class AppelOffre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
+
 
     public Long getId() {
         return id;
@@ -31,11 +35,16 @@ public class AppelOffre {
     private String description;
     private Date dateLimite;
     private String objet;
-
-    @OneToMany(mappedBy = "appelOffre", cascade = CascadeType.ALL, orphanRemoval = true)
+    private String reference;
+    public AppelOffre(long id, String description){
+        this.id = id;
+        this.description = description;
+    }
+    @OneToMany(mappedBy = "appelOffre", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Offre> offres = new ArrayList<>();
 
-    @OneToMany(mappedBy = "appelOffre", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
+    @OneToMany(mappedBy = "appelOffre", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true,
+    fetch = FetchType.LAZY)
     private List<Quantite> quantites = new ArrayList<>();
 
     public List<Quantite> getQuantites() {

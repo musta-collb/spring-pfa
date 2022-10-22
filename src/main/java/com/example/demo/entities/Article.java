@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,10 @@ import java.util.List;
 @Table(name = "article")
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "detailAffectation",
+        "categorie", "garantie", "lotRebut",
+        "ticketReclamations"
+})
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

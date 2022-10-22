@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,9 +10,11 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "ticket_reclamation")
+@Table(name = "ticket_recl" +
+        "amation")
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class TicketReclamation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,44 +29,15 @@ public class TicketReclamation {
     @JoinColumn(name = "article_id")
     private Article article;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     private Date date;
     private String motif;
     private String type;
-
+    private String etat;
     @OneToMany(mappedBy = "ticketReclamation", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
     private List<Commantaire> commantaires = new ArrayList<>();
 
-    public List<Commantaire> getCommantaires() {
-        return commantaires;
-    }
-
-    public void setCommantaires(List<Commantaire> commantaires) {
-        this.commantaires = commantaires;
-    }
-
-    public Article getArticle() {
-        return article;
-    }
-
-    public void setArticle(Article article) {
-        this.article = article;
-    }
-
-    public Personnel getPersonnel() {
-        return personnel;
-    }
-
-    public void setPersonnel(Personnel personnel) {
-        this.personnel = personnel;
-    }
+    @OneToMany(mappedBy = "ticketReclamation", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
+    private List<Intervention> interventions = new ArrayList<>();
 
 
 }

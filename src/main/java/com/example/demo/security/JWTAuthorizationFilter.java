@@ -24,7 +24,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 			throws IOException, ServletException {
 		System.out.println("---jwt authorization");
 		//response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-		response.setHeader("Access-control-Allow-Origin", "http://localhost:3000");
+		response.setHeader("Access-control-Allow-Origin", "*");
 		response.addHeader("Access-Control-Allow-Headers", 
 				"Origin, Accept, X-Requested-With,Content-Type,Access-Control-Request-Method, "
 				+ "Access-Control-RequestHeaders,authorization");
@@ -35,6 +35,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
 			response.setStatus(HttpServletResponse.SC_OK);
 		}else {
 			String jwtToken = request.getHeader(SecurityConstants.HEADER_STRING);
+			System.out.println(jwtToken);
 			if (jwtToken == null || !jwtToken.startsWith(SecurityConstants.TOKEN_PREFIX)) {
 				chain.doFilter(request, response);
 				return;

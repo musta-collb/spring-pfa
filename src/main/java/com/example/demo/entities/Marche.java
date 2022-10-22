@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Table(name = "marche")
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties( {"offres","hibernateLazyInitializer", "handler", "articles", "fournisseur", "appelOffre"})
 public class Marche {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +22,8 @@ public class Marche {
     private Date dateRealisation;
     private Date dateLivraison;
     private long quantite;
+    private String objet;
+    private String reference;
 
     @OneToMany(mappedBy = "marche", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();
@@ -27,6 +31,11 @@ public class Marche {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinColumn(name = "fournisseur_id")
     private Fournisseur fournisseur;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    private Offre offre;
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    private AppelOffre appelOffre ;
 
     public Fournisseur getFournisseur() {
         return fournisseur;

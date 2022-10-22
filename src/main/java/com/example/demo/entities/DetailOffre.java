@@ -1,9 +1,15 @@
 package com.example.demo.entities;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "detail_offre")
+@Data
+@NoArgsConstructor
 public class DetailOffre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +36,7 @@ public class DetailOffre {
     private String marque;
     private double quantite;
     private String detail;
+    private Date dateCreation;
 
     public ArticleGenerique getArticleGenerique() {
         return articleGenerique;

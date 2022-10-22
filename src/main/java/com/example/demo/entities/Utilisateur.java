@@ -1,5 +1,6 @@
 package com.example.demo.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @Table(name = "utilisateur")
 @Data
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "personnels","detailAffectations"})
 public class Utilisateur {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +29,7 @@ public class Utilisateur {
 
     private String utilisateur;
     private  String description;
+    private String designation;
 
     @OneToMany(mappedBy = "utilisateur", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
     private List<Personnel> personnels = new ArrayList<>();
@@ -34,19 +37,4 @@ public class Utilisateur {
     @OneToMany(mappedBy = "utilisateur", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, orphanRemoval = true)
     private List<DetailAffectation> detailAffectations = new ArrayList<>();
 
-    public List<DetailAffectation> getDetailAffectations() {
-        return detailAffectations;
-    }
-
-    public void setDetailAffectations(List<DetailAffectation> detailAffectations) {
-        this.detailAffectations = detailAffectations;
-    }
-
-    public List<Personnel> getPersonnels() {
-        return personnels;
-    }
-
-    public void setPersonnels(List<Personnel> personnels) {
-        this.personnels = personnels;
-    }
 }

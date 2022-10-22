@@ -5,6 +5,7 @@ import com.example.demo.entities.Personnel;
 import com.example.demo.entities.Role;
 import com.example.demo.repositories.PersonnelRepository;
 import com.example.demo.repositories.RoleRepository;
+import com.example.demo.services.PersonnelService;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,10 +26,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/api")
 public class PersonnelController {
+
     @Autowired
-    private RoleRepository roleRepository;
-    @Autowired
-    private PersonnelRepository personnelRepository;
+    private PersonnelService personnelService;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder ;
 
@@ -36,7 +36,8 @@ public class PersonnelController {
     @PostMapping("/record")
     public void signUp(@RequestBody Personnel user) {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        personnelRepository.save(user);
+        //personnelRepository.save(user);
+        personnelService.ajouterPersonnel(user);
     }
     @GetMapping("/users/emailPassword")
     public Personnel getPersonnelByEmailPassword(HttpServletRequest request) throws HttpClientErrorException.BadRequest {
@@ -45,7 +46,8 @@ public class PersonnelController {
         emailPassword.setPassword(request.getParameter("password"));
         emailPassword.setEmail(request.getParameter("email"));
         try {
-            Personnel personnel = personnelRepository.findByEmailEquals(emailPassword.getEmail());
+            //Personnel personnel =  personnelRepository.findByEmailEquals(emailPassword.getEmail());
+            Personnel personnel = personnelService.trouverParEmail(emailPassword.getEmail());
 
             if(personnel != null){
                 String password = personnel.getPassword();
@@ -64,33 +66,23 @@ public class PersonnelController {
     public String printText(HttpServletRequest request){
       return request.getParameter("email");
     };
-
-    @Autowired
-    FilesStorageService storageService;
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        String message = "";
-        try {
-            storageService.save(file);
-            message = "Uploaded the file successfully: " + file.getOriginalFilename();
-            return ResponseEntity.status(HttpStatus.OK).body(message);
-        } catch (Exception e) {
-            message = "Could not upload the file: " + file.getOriginalFilename() + "!";
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
-        }
+    // Mis à jour d'un personnels
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PutMapping(value = "/users/{id}")
+    public ResponseEntity<String> updatePesonnel(@RequestBody PersonnelModifie personnelModifie){
+        System.out.println(personnelModifie.toString());
+        return ResponseEntity.ok().body("hello");
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
-    @PostMapping(value = "/users", headers = "Content-Type= multipart/form-data")
-    public ResponseEntity<String> ajouterPersonnel(@RequestBody PersonnelCostom personnel,@RequestPart("file") MultipartFile file) throws IOException {
+    @PostMapping(value = "/users")
+    public ResponseEntity<String> ajouterPersonnel(@RequestBody PersonnelCostom personnel) throws IOException {
 
-        System.out.println(file.toString());
-
-        if(personnelRepository.findByEmailEquals(personnel.getEmail()) == null){
+        if(personnelService.trouverParEmail(personnel.getEmail()) == null){
             List<Role> roles = new ArrayList<Role>();
 
             personnel.getRoles().forEach(role->{
-                roles.add(roleRepository.findByRoleEquals(role));
+                roles.add(personnelService.tourverRole(role));
             });
             Personnel personnel1 = new Personnel();
             personnel1.setNom(personnel.getNom());
@@ -99,12 +91,55 @@ public class PersonnelController {
             personnel1.setPassword(bCryptPasswordEncoder.encode(personnel.getPassword()));
             personnel1.setFonction(personnel.getFonction());
             personnel1.setRoles(roles);
-            personnelRepository.save(personnel1);
+            personnelService.ajouterPersonnel(personnel1);
             return ResponseEntity.ok().body("l'utilisateur "+personnel.getNom()+ " "+ personnel.getPrenom()+" a été crée!");
         }
 
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("un compet avec cet email est déjà crée!");
     };
+
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<List<PersonnelCS>> listerPersonnel(){
+        List<PersonnelCS> personnels = new ArrayList<PersonnelCS>();
+        personnelService.trouverTous().forEach(personnel -> {
+            PersonnelCS personnelCS = new PersonnelCS();
+            personnelCS.setEmail(personnel.getEmail());
+            personnelCS.setFonction(personnel.getFonction());
+            personnelCS.setNomPrenom(personnel.getNom()+ " "+ personnel.getPrenom());
+            personnelCS.setId(personnel.getId());
+            List<String> roles = new ArrayList<String>();
+            personnel.getRoles().forEach(role -> {
+                roles.add(role.getRole(
+
+                ));
+            });
+            personnelCS.setRoles(roles);
+            personnelCS.setImage(personnel.getImage());
+            personnels.add(personnelCS);
+        });
+        return ResponseEntity.ok().body(personnels);
+    }
+
+    @GetMapping("/users/{id}")
+    public Personnel getById(@PathVariable long id){
+        Personnel personnel = personnelService.trouverParId(id);
+        return personnel;
+    }
+
+    // testing an end point
+
+
+    @Data
+    @NoArgsConstructor
+    static class PersonnelModifie{
+        private long id;
+        private String nom;
+        private String prenom;
+        private List<String> roles;
+    }
+
     @Data
     static class PersonnelCostom{
         private  String nom;
@@ -117,32 +152,26 @@ public class PersonnelController {
         }
     }
 
-    //@PreAuthorize("hasAuthority('ADMIN')")
-    @GetMapping("/users")
-    public ResponseEntity<List<PersonnelCS>> listerPersonnel(){
-        List<PersonnelCS> personnels = new ArrayList<PersonnelCS>();
-        personnelRepository.findAll().forEach(personnel -> {
-            PersonnelCS personnelCS = new PersonnelCS();
-            personnelCS.setEmail(personnel.getEmail());
-            personnelCS.setFonction(personnel.getFonction());
-            personnelCS.setNomPrenom(personnel.getNom()+ " "+ personnel.getPrenom());
-            personnelCS.setId(personnel.getId());
-            personnelCS.setRoles(personnel.getRoles());
-            personnelCS.setImage(personnel.getImage());
-            personnels.add(personnelCS);
-        });
-        return ResponseEntity.ok().body(personnels);
-    }
-
     @Data
     @NoArgsConstructor
     static class PersonnelCS{
         private String nomPrenom;
         private String email;
         private long id;
-        private List<Role> roles;
+        private List<String> roles;
         private String fonction;
         private String image;
-        private Object file;
+        //private Object file;
     }
+
+    @GetMapping("/users/search/{search}")
+    public List<Personnel> getPersonnelBySearch(@PathVariable String search){
+        System.out.println("searched : "+ search);
+        List<Personnel> personnels = personnelService.trouverParSearch(search);
+        personnels.forEach(personnel ->{
+            personnel.setRoles(null);
+        } );
+      return personnels;
+    };
+
 }

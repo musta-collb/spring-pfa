@@ -1,7 +1,7 @@
 package com.example.demo.security;
 
 import com.example.demo.entities.Personnel;
-import com.example.demo.repositories.PersonnelRepository;
+import com.example.demo.services.PersonnelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,12 +16,15 @@ import java.util.Collection;
 
 @Component
 public class UserDetailServiceImp implements UserDetailsService {
+    //@Autowired
+    //private PersonnelRepository personnelRepository;
     @Autowired
-    private PersonnelRepository personnelRepository;
+    private PersonnelService personnelService;
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
             System.out.println("---userDeait service");
-            Personnel personnel = personnelRepository.findByEmailEquals(email);
+            //Personnel personnel = personnelRepository.findByEmailEquals(email);
+            Personnel personnel = personnelService.trouverParEmail(email);
             if(personnel == null){
                 throw new UsernameNotFoundException("Utilisateur non existant!");
             }
